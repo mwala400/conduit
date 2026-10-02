@@ -26,7 +26,7 @@ const signalingUrl = () => {
     return url.toString();
   }
   if (Capacitor.isNativePlatform()) {
-    throw new Error("Set your public Conduit server address in Settings before sharing.");
+    throw new Error("Conduit peer discovery is not available without a configured sharing server.");
   }
   return `${location.protocol === "https:" ? "wss:" : "ws:"}//${location.host}/signal`;
 };
@@ -196,9 +196,19 @@ const setPeerPresence = (update) => {
 const connectPeerPresence = () => {
   if (!peerPresenceSubscribers.size || peerPresenceSocket?.readyState === WebSocket.CONNECTING ||
     peerPresenceSocket?.readyState === WebSocket.OPEN) return;
-  const socket = new WebSocket(signalingUrl());
+  let socket;
+  try {
+    socket = new WebSocket(signalingUrl());
+  } catch (error) {
+    setPeerPresence({
+      state: "disconnected",
+      peers: [],
+      error: error instanceof Error ? error.message : "Could not connect to the sharing server.",
+    });
+    return;
+  }
   peerPresenceSocket = socket;
-  setPeerPresence({ state: "connecting", peers: [] });
+  setPeerPresence({ state: "connecting", peers: [], error: undefined });
 
   socket.addEventListener("open", () => {
     socket.send(JSON.stringify({ type: "register-peer", ...peerIdentity() }));
@@ -252,6 +262,15 @@ export const subscribeToPeerPresence = (listener) => {
     peerPresenceSnapshot = { state: "disconnected", peers: [] };
     socket?.close(1000, "No active Conduit screens");
   };
+};
+
+export const reconnectPeerPresence = () => {
+  if (peerPresenceRetry) clearTimeout(peerPresenceRetry);
+  peerPresenceRetry = null;
+  const socket = peerPresenceSocket;
+  peerPresenceSocket = null;
+  socket?.close(1000, "Sharing server settings changed");
+  if (peerPresenceSubscribers.size) connectPeerPresence();
 };
 
 export const inviteNearbyPeer = (peerId, room) => {

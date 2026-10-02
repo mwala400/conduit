@@ -83,6 +83,11 @@ export default function Home() {
 
   return (
     <div className="p-4 lg:p-6 space-y-4">
+      {presence.error && (
+        <div className="bento-cell p-4" role="alert">
+          <p className="text-sm text-secondary-ink">{presence.error}</p>
+        </div>
+      )}
       {/* Header bar */}
       <div className="flex flex-col sm:flex-row sm:items-center gap-3">
         <div className="flex items-center gap-3">
