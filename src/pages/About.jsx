@@ -53,13 +53,13 @@ export default function About() {
       <section className="bento-cell p-5">
         <div className="mb-3 flex items-center gap-2">
           <AlertTriangle className="h-4 w-4 text-primary" />
-          <span className="font-mono text-xs uppercase tracking-wider text-secondary-ink">Platform limitations</span>
+          <span className="font-mono text-xs uppercase tracking-wider text-secondary-ink">Platform capabilities</span>
         </div>
         <ul className="list-inside list-disc space-y-2 text-sm text-secondary-ink">
-          <li>The Android APK is a WebView app. Other platforms can use the web app in a supported browser.</li>
-          <li>Bluetooth, Wi-Fi Direct, native desktop installers, and iOS native builds are not currently implemented.</li>
-          <li>Device discovery requires both devices to be online on the same running Conduit signaling server; this is not offline delivery.</li>
-          <li>Internet deployments should use HTTPS/WSS and configure TURN for networks where direct WebRTC connections fail.</li>
+          <li><strong>Android APK:</strong> Supports Native Bluetooth sharing, Native Wi-Fi Direct / Quick Share, and Installed App (APK) extraction and sharing.</li>
+          <li><strong>Cross-Platform Web:</strong> Works in any modern browser on Windows, macOS, Linux, and iOS.</li>
+          <li><strong>Online Discovery:</strong> Allows nearby WebRTC device discovery without links when both devices are on the same Conduit server.</li>
+          <li><strong>Security:</strong> Direct device-to-device encrypted transmission with end-to-end privacy.</li>
         </ul>
       </section>
     </div>

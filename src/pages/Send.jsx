@@ -5,6 +5,7 @@ import { createShareRoom, inviteNearbyPeer, stageFilesForSend, subscribeToPeerPr
 import { QRCodeSVG } from "qrcode.react";
 import { Check, Copy, File as FileIcon, Folder, Link as LinkIcon, Send as SendIcon, Upload, X, Wifi } from "lucide-react";
 import { cn } from "@/lib/utils";
+import AppPicker from "@/components/AppPicker";
 
 export default function Send() {
   const [selectedFiles, setSelectedFiles] = useState(() => takeStagedFiles());
@@ -164,6 +165,11 @@ export default function Send() {
               </div>
             </div>
           )}
+
+          {/* Installed Apps & Native Bluetooth / Wi-Fi Direct Picker */}
+          <div className="bento-cell p-5">
+            <AppPicker onStageApkFile={(file) => setSelectedFiles((curr) => [...curr, file])} />
+          </div>
         </div>
 
         <div className="space-y-4">

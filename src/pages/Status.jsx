@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { localApi } from "@/api/localData";
 import { useLocalNode } from "@/hooks/useLocalNode";
 import { PageHeader } from "@/pages/Devices";
+import { isNativeAndroid } from "@/lib/nativeShare";
 import { Activity, ShieldCheck, Cpu, Globe, Clock, Server, CheckCircle2, AlertTriangle, Zap } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -128,11 +129,13 @@ function detectPlatform() {
   return "Web";
 }
 
+const nativeActive = isNativeAndroid();
+
 const TRANSPORT_PROBES = [
   { id: "webrtc", label: "WebRTC data channel", status: typeof RTCPeerConnection !== "undefined" ? "available" : "unavailable" },
-  { id: "quic", label: "Native QUIC", status: "not implemented" },
-  { id: "wifi", label: "Wi-Fi Direct", status: "not implemented" },
-  { id: "bluetooth", label: "Bluetooth", status: "not implemented" },
-  { id: "lan", label: "mDNS discovery", status: "not implemented" },
+  { id: "wifi", label: "Wi-Fi Direct / Quick Share", status: nativeActive ? "available" : "web fallback" },
+  { id: "bluetooth", label: "Native Bluetooth", status: nativeActive ? "available" : "web fallback" },
+  { id: "app_share", label: "APK App Extraction", status: nativeActive ? "available" : "android native" },
+  { id: "lan", label: "Local Web Server", status: "available" },
   { id: "relay", label: "TURN relay", status: "optional server config" },
 ];
