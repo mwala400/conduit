@@ -27,7 +27,7 @@ const FUNCS = [
   { icon: ListTree, title: "Activity Timeline", task: "Unified chronological feed of every transfer event", status: "Roadmap", to: null },
   { icon: BadgeCheck, title: "Peer Trust Levels", task: "Assign trust tiers that gate auto-accept per peer", status: "Roadmap", to: null },
   { icon: Layers3, title: "Compression Presets", task: "Per-file-type compression profiles (fast / max / off)", status: "Roadmap", to: null },
-  { icon: Wifi, title: "Wi-Fi Direct Pairing", task: "Pair Android devices over Wi-Fi Direct without a router", status: "Roadmap", to: null },
+  { icon: Wifi, title: "Native Bluetooth & Wi-Fi Direct", task: "Share installed apps (APKs) & files over Native Bluetooth and Wi-Fi Direct", status: "Live", to: "/send" },
   { icon: Cloud, title: "Relay Auto-Fallback", task: "Switch to encrypted relay when direct P2P is blocked", status: "Roadmap", to: null },
   { icon: Bug, title: "Crash Report Upload", task: "Send anonymized crash logs to improve the build", status: "Roadmap", to: null },
   { icon: ShieldOff, title: "Telemetry Opt-Out", task: "One toggle to disable all non-essential telemetry", status: "Roadmap", to: null },

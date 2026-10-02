@@ -21,13 +21,13 @@ const FEATURES = [
   { icon: Palette, title: "Custom Background Themes", text: "Personalize the workspace background — saved per device.", status: "Live", tone: "primary" },
   { icon: Activity, title: "System Telemetry", text: "CPU and disk performance telemetry is not connected to native system counters.", status: "Roadmap", tone: "primary" },
   { icon: Bell, title: "Notification Center", text: "Toast + in-app alerts for deliveries, failures and integrity.", status: "Live", tone: "success" },
-  { icon: Download, title: "Platform Installation", text: "Android APK is available; other supported devices use a browser.", status: "Partial", tone: "primary" },
+  { icon: Download, title: "Platform Installation & App Extraction", text: "Android APK with Native Bluetooth, Wi-Fi Direct, and App sharing is built & downloadable; browsers work on all platforms.", status: "Live", tone: "success" },
   { icon: Terminal, title: "Desktop Installers", text: "Windows, macOS, and Linux native installers are not built yet.", status: "Roadmap", tone: "primary" },
   { icon: Gauge, title: "Adaptive Concurrency", text: "Transfer chunk backpressure is enabled; system/battery tuning is not implemented.", status: "Partial", tone: "primary" },
-  { icon: Smartphone, title: "Cross-Platform Clients", text: "Browser clients work across modern OSes; the native wrapper currently targets Android.", status: "Partial", tone: "success" },
+  { icon: Smartphone, title: "Cross-Platform Clients", text: "Full cross-platform sharing between Android native app and Web browsers on iOS, Windows, macOS, Linux.", status: "Live", tone: "success" },
   { icon: Globe, title: "Installable PWA", text: "PWA packaging and offline support are not configured yet.", status: "Roadmap", tone: "primary" },
   { icon: ShieldCheck, title: "Honest Platform UI", text: "We surface browser limits instead of faking native P2P we can't run.", status: "Live", tone: "success" },
-  { icon: Cpu, title: "Native Bluetooth / Wi-Fi Direct", text: "Bluetooth and Wi-Fi Direct transports are not implemented; nearby send uses the Conduit server and WebRTC.", status: "Roadmap", tone: "primary" },
+  { icon: Cpu, title: "Native Bluetooth / Wi-Fi Direct", text: "Supports Native Bluetooth, Wi-Fi Direct / Quick Share, and Installed App (APK) extraction on Android.", status: "Live", tone: "success" },
   { icon: GitBranch, title: "GitHub Releases Auto-Publish", text: "A version tag builds and publishes the Android debug APK and web/server ZIP.", status: "Live", tone: "primary" },
 ];
 

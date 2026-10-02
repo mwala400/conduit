@@ -66,7 +66,7 @@ export default function Guide() {
         <h2 className="mb-2 flex items-center gap-2 font-semibold text-primary-ink"><ShieldCheck className="h-4 w-4 text-primary" /> A few important details</h2>
         <ul className="list-inside list-disc space-y-1 text-sm text-secondary-ink">
           <li>Nearby devices appear only while Conduit is open and connected to the same signaling server.</li>
-          <li>Direct device invitations are not Bluetooth or Wi-Fi Direct; they use the server for discovery and WebRTC for transfer.</li>
+          <li>Android app supports Native Bluetooth, Wi-Fi Direct, and Installed App (APK) sharing; Web clients use WebRTC P2P.</li>
           <li>QR sharing is one-way: the sender displays the QR and the receiver scans it. Camera scanning requires permission.</li>
           <li>Share links and codes are for a live session, not offline delivery. Keep the sender connected until the transfer completes.</li>
         </ul>
