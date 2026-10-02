@@ -31,6 +31,17 @@ The server listens on port `8787` by default and serves both the web app and Web
 
 For internet transfers, both devices need a reachable public server address. Set that address in Android **Settings → File sharing server**. Some carrier, office, or home networks block direct peer connections; configure a TURN service using `TURN_URLS` and `TURN_SHARED_SECRET` on the Node server. TURN relays may incur bandwidth costs.
 
+## Deploy the web app and sharing backend
+
+The Vercel project hosts the Vite frontend. The persistent Node/WebSocket signaling service runs separately on Render using the included `render.yaml` Blueprint. Connect this repository to Vercel and Render, deploy the Render Blueprint, then configure:
+
+- **Vercel `VITE_SIGNALING_URL`:** the Render service's HTTPS URL ending in `/signal`. Set it for Production and Preview, then redeploy.
+- **Render `CORS_ORIGINS`:** the Vercel production origin (for example `https://conduit.example.com`), plus `https://localhost` and `capacitor://localhost` for Android.
+- **Android builds:** add the same public `VITE_SIGNALING_URL` as a GitHub Actions repository variable so release APKs use the deployed signaling service by default. Android users can also enter the Render URL under Settings.
+- **TURN configuration:** set `TURN_URLS` and either `TURN_SHARED_SECRET` (for TURN REST credentials) or `TURN_USERNAME` plus `TURN_CREDENTIAL` (for static provider credentials). TURN is needed for networks that block direct WebRTC connections.
+
+The free Render service may sleep when idle; the first connection can be delayed, and active sessions can end when the service restarts. Upgrade the Render plan for an always-on service. Vercel serves the frontend only. The Neon integration is not currently used by this app; `DATABASE_URL` alone does not provide signaling, TURN relay, or file storage. Do not commit `.env` files or put server secrets in Vercel's `VITE_` variables. Use `.env.example` as a variable-name template and set production values in each provider's environment-variable settings.
+
 ## Platform support
 
 - **Android:** install the APK attached to a GitHub Release. The APK is a debug-signed sideload build; new CI builds use a new debug signing key, so upgrading may require uninstalling the previous build first. A stable release signing key must be configured before seamless updates or Play Store publication.
@@ -38,6 +49,8 @@ For internet transfers, both devices need a reachable public server address. Set
 - **Windows, macOS, and Linux:** use the web app in a current browser. This project does not currently package native desktop installers.
 
 Any sending and receiving device can use the browser client; both people do not have to install the Android app. Link-free device discovery requires both clients to connect to the same running Conduit server.
+
+On Android, select files in Send and choose **Share via Quick Share / Bluetooth** to use Android's system sharing sheet. The receiving phone accepts with Quick Share; Android saves the files to its chosen destination (usually Downloads). This does not require a Conduit server. Availability and transport (Wi-Fi or Bluetooth) depend on the phones and Android version. Conduit also appears as a target when another Android app shares files; files shared directly to Conduit are copied to Downloads/Conduit.
 
 ## GitHub releases
 

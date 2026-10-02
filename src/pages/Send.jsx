@@ -6,6 +6,7 @@ import { QRCodeSVG } from "qrcode.react";
 import { Check, Copy, File as FileIcon, Folder, Link as LinkIcon, Send as SendIcon, Upload, X, Wifi } from "lucide-react";
 import { cn } from "@/lib/utils";
 import AppPicker from "@/components/AppPicker";
+import { isNativeAndroid, shareFilesViaAndroid } from "@/lib/nativeShare";
 
 export default function Send() {
   const [selectedFiles, setSelectedFiles] = useState(() => takeStagedFiles());
@@ -17,6 +18,7 @@ export default function Send() {
   const [copied, setCopied] = useState(false);
   const [directPeer, setDirectPeer] = useState(null);
   const [presence, setPresence] = useState({ state: "connecting", peers: [] });
+  const [nearbyShareStarted, setNearbyShareStarted] = useState(false);
   const shareRoom = useRef(null);
 
   const totalSize = useMemo(
@@ -99,6 +101,21 @@ export default function Send() {
     }
   };
 
+  const shareNearby = async () => {
+    if (!selectedFiles.length || creating) return;
+    setCreating(true);
+    setError("");
+    setNearbyShareStarted(false);
+    try {
+      await shareFilesViaAndroid(selectedFiles);
+      setNearbyShareStarted(true);
+    } catch (shareError) {
+      setError(shareError.message || "Could not open Android nearby sharing.");
+    } finally {
+      setCreating(false);
+    }
+  };
+
   return (
     <div className="p-4 lg:p-6 space-y-4">
       <PageHeader
@@ -176,12 +193,34 @@ export default function Send() {
           <div className="bento-cell p-5 space-y-3">
             <div className="flex items-center gap-2">
               <Wifi className="w-4 h-4 text-primary" />
-              <span className="font-mono text-xs text-secondary-ink uppercase tracking-wider">Send without a link</span>
+              <span className="font-mono text-xs text-secondary-ink uppercase tracking-wider">Nearby sharing</span>
             </div>
             <p className="text-sm text-secondary-ink">
-              Both devices must be online in Conduit and connected to the same sharing server.
+              Use Android Quick Share or Bluetooth to send directly to a nearby phone without a Conduit server.
             </p>
-            {presence.state !== "connected" ? (
+            {isNativeAndroid() && (
+              <button
+                onClick={shareNearby}
+                disabled={!selectedFiles.length || creating}
+                className="w-full inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-4 py-3 text-sm font-semibold text-primary-ink disabled:opacity-40"
+              >
+                <Wifi className="h-4 w-4" />
+                {creating ? "Preparing files…" : "Share via Quick Share / Bluetooth"}
+              </button>
+            )}
+            {nearbyShareStarted && (
+              <p className="text-xs text-success" role="status">
+                Choose a nearby device in Android's sharing sheet. Android handles the transfer and saves the received files.
+              </p>
+            )}
+            <p className="text-xs text-secondary-ink">
+              Conduit-to-Conduit device discovery still requires both phones to use the same configured sharing server.
+            </p>
+            {presence.error ? (
+              <p className="text-xs text-secondary-ink" role="status">
+                Conduit device discovery needs a sharing server. Quick Share or Bluetooth above works without one.
+              </p>
+            ) : presence.state !== "connected" ? (
               <p className="text-xs text-secondary-ink" role="status">Connecting to the sharing server… Check Settings if this takes too long.</p>
             ) : presence.peers.length ? (
               <div className="space-y-2">

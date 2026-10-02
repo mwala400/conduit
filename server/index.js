@@ -10,6 +10,20 @@ const publicRoot = resolve("dist");
 const rooms = new Map();
 const peers = new Map();
 const peerIdPattern = /^[a-f0-9]{32}$/i;
+const defaultCorsOrigins = [
+  "https://localhost",
+  "capacitor://localhost",
+  "http://localhost:5173",
+  "http://localhost:4173",
+  "http://127.0.0.1:5173",
+  "http://127.0.0.1:4173",
+];
+const allowedCorsOrigins = new Set(
+  (process.env.CORS_ORIGINS || defaultCorsOrigins.join(","))
+    .split(",")
+    .map((origin) => origin.trim().replace(/\/$/, ""))
+    .filter(Boolean),
+);
 const mimeTypes = {
   ".css": "text/css; charset=utf-8",
   ".html": "text/html; charset=utf-8",
@@ -26,8 +40,12 @@ const iceServers = () => {
   const servers = [{ urls: ["stun:stun.l.google.com:19302", "stun:stun1.l.google.com:19302"] }];
   const urls = (process.env.TURN_URLS || "").split(",").map((url) => url.trim()).filter(Boolean);
   const secret = process.env.TURN_SHARED_SECRET;
+  const staticUsername = process.env.TURN_USERNAME;
+  const staticCredential = process.env.TURN_CREDENTIAL;
 
-  if (urls.length && secret) {
+  if (urls.length && staticUsername && staticCredential) {
+    servers.push({ urls, username: staticUsername, credential: staticCredential });
+  } else if (urls.length && secret) {
     const expires = Math.floor(Date.now() / 1000) + 5 * 60;
     const username = `${expires}:${randomUUID()}`;
     const credential = createHmac("sha1", secret).update(username).digest("base64");
@@ -35,6 +53,21 @@ const iceServers = () => {
   }
 
   return servers;
+};
+
+const isAllowedOrigin = (origin) => {
+  if (!origin || allowedCorsOrigins.has(origin)) return true;
+  if (process.env.NODE_ENV === "production") return false;
+  return /^http:\/\/(?:localhost|127(?:\.\d{1,3}){3}|10(?:\.\d{1,3}){3}|192\.168(?:\.\d{1,3}){2}|172\.(?:1[6-9]|2\d|3[01])(?:\.\d{1,3}){2})(?::\d+)?$/.test(origin);
+};
+
+const applyCorsHeaders = (request, response) => {
+  const origin = request.headers.origin;
+  if (!origin) return true;
+  if (!isAllowedOrigin(origin)) return false;
+  response.setHeader("Access-Control-Allow-Origin", origin);
+  response.setHeader("Vary", "Origin");
+  return true;
 };
 
 const broadcastPeerLists = () => {
@@ -52,7 +85,30 @@ const broadcastPeerLists = () => {
 const server = createServer((request, response) => {
   const requestUrl = new URL(request.url || "/", `http://${request.headers.host || "localhost"}`);
 
+  if (request.method === "GET" && requestUrl.pathname === "/health") {
+    response.writeHead(200, { "Content-Type": "application/json", "Cache-Control": "no-store" });
+    response.end(JSON.stringify({ status: "ok" }));
+    return;
+  }
+
+  if (requestUrl.pathname === "/api/ice-servers" && request.method === "OPTIONS") {
+    if (!applyCorsHeaders(request, response)) {
+      response.writeHead(403);
+      response.end();
+      return;
+    }
+    response.setHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
+    response.writeHead(204);
+    response.end();
+    return;
+  }
+
   if (request.method === "GET" && requestUrl.pathname === "/api/ice-servers") {
+    if (!applyCorsHeaders(request, response)) {
+      response.writeHead(403);
+      response.end();
+      return;
+    }
     response.writeHead(200, { "Content-Type": "application/json", "Cache-Control": "no-store" });
     response.end(JSON.stringify(iceServers()));
     return;
@@ -105,7 +161,8 @@ const webSockets = new WebSocketServer({ noServer: true, maxPayload: 1024 * 1024
 
 server.on("upgrade", (request, socket, head) => {
   const pathname = new URL(request.url || "/", `http://${request.headers.host || "localhost"}`).pathname;
-  if (pathname !== "/signal") {
+  if (pathname !== "/signal" || !isAllowedOrigin(request.headers.origin)) {
+    socket.write("HTTP/1.1 403 Forbidden\r\nConnection: close\r\n\r\n");
     socket.destroy();
     return;
   }

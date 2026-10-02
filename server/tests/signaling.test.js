@@ -60,7 +60,15 @@ before(async () => {
   const port = await freePort();
   origin = `http://127.0.0.1:${port}`;
   serverProcess = spawn(process.execPath, ["server/index.js"], {
-    env: { ...process.env, HOST: "127.0.0.1", PORT: String(port) },
+    env: {
+      ...process.env,
+      HOST: "127.0.0.1",
+      PORT: String(port),
+      CORS_ORIGINS: origin,
+      TURN_URLS: "turn:turn.example.com:3478",
+      TURN_USERNAME: "test-user",
+      TURN_CREDENTIAL: "test-credential",
+    },
     stdio: "ignore",
   });
 
@@ -81,10 +89,29 @@ after(() => {
 });
 
 test("publishes STUN configuration without requiring a database", async () => {
-  const response = await fetch(`${origin}/api/ice-servers`);
+  const response = await fetch(`${origin}/api/ice-servers`, {
+    headers: { Origin: origin },
+  });
   assert.equal(response.status, 200);
+  assert.equal(response.headers.get("access-control-allow-origin"), origin);
   const servers = await response.json();
   assert.ok(servers.some((server) => server.urls.includes("stun:stun.l.google.com:19302")));
+  assert.ok(servers.some((server) =>
+    server.urls.includes("turn:turn.example.com:3478") &&
+    server.username === "test-user" &&
+    server.credential === "test-credential"
+  ));
+});
+
+test("reports backend health and rejects unapproved browser origins", async () => {
+  const health = await fetch(`${origin}/health`);
+  assert.equal(health.status, 200);
+  assert.deepEqual(await health.json(), { status: "ok" });
+
+  const denied = await fetch(`${origin}/api/ice-servers`, {
+    headers: { Origin: "https://untrusted.example" },
+  });
+  assert.equal(denied.status, 403);
 });
 
 test("forwards an invitation manifest between sender and receiver", async () => {
