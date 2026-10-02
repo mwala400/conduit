@@ -10,7 +10,7 @@ const CLIENTS = [
     name: "Android",
     icon: Smartphone,
     status: "APK build",
-    description: "Install the Android APK from Releases. The receiver can paste a share link or scan the sender's QR code.",
+    description: "Install the Android APK to share installed apps (APKs), photos, and files via Native Bluetooth, Wi-Fi Direct, or WebRTC.",
   },
   {
     name: "iPhone and iPad",
