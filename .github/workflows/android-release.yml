@@ -1,0 +1,60 @@
+name: Build Android release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Test signaling and direct invitations
+        run: npm run test:sharing
+
+      - name: Build web app and sync Android
+        run: |
+          npm run build
+          npx cap sync android
+
+      - name: Build universal Android APK
+        run: cd android && ./gradlew --no-daemon assembleDebug
+
+      - name: Prepare release assets
+        run: |
+          cp android/app/build/outputs/apk/debug/app-debug.apk Conduit-Android-debug.apk
+          zip -qr Conduit-Web-Server.zip dist server package.json package-lock.json README.md
+
+      - name: Publish GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" \
+            Conduit-Android-debug.apk \
+            Conduit-Web-Server.zip \
+            --title "Conduit $GITHUB_REF_NAME" \
+            --generate-notes

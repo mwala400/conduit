@@ -1,0 +1,8 @@
+{
+  "appId": "com.conduit.fileshare",
+  "appName": "Conduit",
+  "webDir": "dist",
+  "server": {
+    "androidScheme": "https"
+  }
+}
