@@ -1,0 +1,17 @@
+{
+  "short_name": "Conduit",
+  "name": "Conduit — Universal P2P Share",
+  "description": "Universal peer-to-peer file & app sharing platform with Native Bluetooth, Wi-Fi Direct, and WebRTC.",
+  "icons": [
+    {
+      "src": "favicon.ico",
+      "sizes": "64x64 32x32 24x24 16x16",
+      "type": "image/x-icon"
+    }
+  ],
+  "start_url": "/",
+  "background_color": "#0B0F17",
+  "theme_color": "#00F0FF",
+  "display": "standalone",
+  "orientation": "any"
+}
