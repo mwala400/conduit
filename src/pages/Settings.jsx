@@ -2,6 +2,7 @@ import { useState } from "react";
 import { PageHeader } from "@/pages/Devices";
 import { Settings as SettingsIcon, Gauge, Battery, Wifi, Zap } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { reconnectPeerPresence } from "@/lib/shareTransport";
 
 const buildSignalingUrl = /** @type {ImportMeta & {env?: {VITE_SIGNALING_URL?: string}}} */ (import.meta).env
   ?.VITE_SIGNALING_URL;
@@ -47,6 +48,7 @@ export default function Settings() {
       parsed.hash = "";
       localStorage.setItem("conduit.signaling_url", parsed.toString());
       setSharingServer(parsed.origin);
+      reconnectPeerPresence();
       setSharingServerSaved(true);
     } catch (error) {
       setSharingServerError(error.message || "Enter a valid server address, such as https://share.example.com.");
