@@ -1,3 +1,6 @@
+import { useEffect } from "react";
+import { Capacitor, registerPlugin } from "@capacitor/core";
+import { toast } from "sonner";
 import { Toaster } from "@/components/ui/toaster"
 import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClientInstance } from '@/lib/query-client'
@@ -37,6 +40,8 @@ import Functions from '@/pages/Functions';
 import Servers from '@/pages/Servers';
 import Packets from '@/pages/Packets';
 import Templates from '@/pages/Templates';
+
+const nativeShare = registerPlugin("NativeShare");
 
 const AppRoutes = () => {
   return (
@@ -79,11 +84,58 @@ const AppRoutes = () => {
   );
 };
 
+const NativeIncomingShareHandler = () => {
+  useEffect(() => {
+    if (!Capacitor.isNativePlatform() || Capacitor.getPlatform() !== "android") return undefined;
+
+    let mounted = true;
+    let processing = false;
+    let pendingImport = false;
+    let listenerHandle;
+    const processIncomingShare = async () => {
+      if (processing) {
+        pendingImport = true;
+        return;
+      }
+      processing = true;
+      do {
+        pendingImport = false;
+        try {
+          const result = await nativeShare.receiveSharedFiles();
+          if (mounted && result.files?.length) {
+            const names = result.files.map((file) => file.name).join(", ");
+            toast.success(`Received ${result.files.length} file(s). Saved in Downloads/Conduit: ${names}`);
+          }
+        } catch (error) {
+          if (mounted) toast.error(error.message || "Could not save the shared files.");
+        }
+      } while (mounted && pendingImport);
+      processing = false;
+    };
+
+    nativeShare.addListener("shareReceived", processIncomingShare).then((handle) => {
+      listenerHandle = handle;
+      if (!mounted) handle.remove();
+    }).catch((error) => {
+      if (mounted) toast.error(error.message || "Could not listen for incoming shared files.");
+    });
+    processIncomingShare();
+
+    return () => {
+      mounted = false;
+      listenerHandle?.remove();
+    };
+  }, []);
+
+  return null;
+};
+
 
 function App() {
   return (
     <QueryClientProvider client={queryClientInstance}>
       <Router>
+        <NativeIncomingShareHandler />
         <ScrollToTop />
         <AppRoutes />
       </Router>

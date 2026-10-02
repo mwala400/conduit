@@ -34,6 +34,8 @@ jobs:
         run: npm run test:sharing
 
       - name: Build web app and sync Android
+        env:
+          VITE_SIGNALING_URL: ${{ vars.VITE_SIGNALING_URL }}
         run: |
           npm run build
           npx cap sync android

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { getInstalledApps, getSelfApk, shareViaBluetooth, shareViaWifiDirect } from "@/lib/nativeShare";
 import { formatBytes } from "@/lib/format";
-import { Bluetooth, Wifi, Smartphone, Search, Share2, Check, Download, Send, Loader2 } from "lucide-react";
+import { Bluetooth, Wifi, Smartphone, Search, Send, Loader2 } from "lucide-react";
 
 export default function AppPicker({ onStageApkFile }) {
   const [apps, setApps] = useState([]);
@@ -37,9 +37,9 @@ export default function AppPicker({ onStageApkFile }) {
   const handleBluetoothShare = async (apkPath, appName) => {
     try {
       setSharingApp(appName);
-      setStatusMsg(`Opening Bluetooth share for ${appName}…`);
+      setStatusMsg(`Choose Bluetooth or another nearby sharing option for ${appName}…`);
       await shareViaBluetooth(apkPath);
-      setStatusMsg(`Shared ${appName} via Bluetooth!`);
+      setStatusMsg(`Android's sharing sheet opened for ${appName}. Choose a nearby device to continue.`);
     } catch (err) {
       setStatusMsg(`Error: ${err.message || "Bluetooth share failed"}`);
     } finally {
@@ -50,9 +50,9 @@ export default function AppPicker({ onStageApkFile }) {
   const handleWifiShare = async (apkPath, appName) => {
     try {
       setSharingApp(appName);
-      setStatusMsg(`Opening Wi-Fi Direct share for ${appName}…`);
+      setStatusMsg(`Choose Quick Share or another nearby sharing option for ${appName}…`);
       await shareViaWifiDirect(apkPath);
-      setStatusMsg(`Shared ${appName} via Wi-Fi Direct!`);
+      setStatusMsg(`Android's sharing sheet opened for ${appName}. Choose a nearby device to continue.`);
     } catch (err) {
       setStatusMsg(`Error: ${err.message || "Wi-Fi Direct share failed"}`);
     } finally {
@@ -101,7 +101,7 @@ export default function AppPicker({ onStageApkFile }) {
               onClick={() => handleWifiShare(selfApk.apkPath, "Conduit App")}
               className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs"
             >
-              <Wifi className="w-3.5 h-3.5" /> Wi-Fi Direct
+              <Wifi className="w-3.5 h-3.5" /> Quick Share / Wi-Fi
             </button>
           </div>
         </div>
